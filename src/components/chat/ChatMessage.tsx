@@ -9,9 +9,19 @@ type Props = {
   message: OpenAIChatMessage;
 };
 
+function removeTag(content:string){
+  if (content.indexOf("<") >0){
+    return content.substring(0,content.indexOf("<"))
+  }
+  return content
+}
+
+function hasTag(content:string){
+  return content.indexOf("<")>-1
+}
+
 export default function ChatMessage({ message: { id, role, content } }: Props) {
   const [hover, setHover] = React.useState(false);
-
   return (
     <div
       className={`flex cursor-pointer flex-row items-center p-4 transition-all ${
@@ -33,9 +43,15 @@ export default function ChatMessage({ message: { id, role, content } }: Props) {
             {role === "user" ? (
               <UserMessageContent content={content} />
             ) : (
-              <AssistantMessageContent content={content} />
+              <AssistantMessageContent content={removeTag(content)} />
             )}
           </div>
+         { hasTag(content)  && (<button
+          className={`hidden rounded bg-green-500 p-4 text-white hover:bg-green-600 md:block`}
+          onClick={()=>{}}
+        >
+        Execute
+      </button>)}
         </div>
       </div>
     </div>

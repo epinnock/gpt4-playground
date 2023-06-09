@@ -1,6 +1,7 @@
 import { OpenAIChatMessage, OpenAIConfig } from "./OpenAI.types";
 import {
   createParser,
+  EventSourceParseCallback,
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
@@ -18,7 +19,7 @@ export type OpenAIRequest = {
   messages: OpenAIChatMessage[];
 } & OpenAIConfig;
 
-export const getOpenAICompletion = async (
+export const getOpenAICompletion0 = async (
   token: string,
   payload: OpenAIRequest
 ) => {
@@ -57,6 +58,7 @@ export const getOpenAICompletion = async (
             if (counter < 2 && (text.match(/\n/) || []).length) {
               return;
             }
+
             const queue = encoder.encode(text);
             controller.enqueue(queue);
             counter++;
@@ -70,6 +72,38 @@ export const getOpenAICompletion = async (
       for await (const chunk of response.body as any) {
         parser.feed(decoder.decode(chunk));
       }
+    },
+  });
+
+  
+
+  return stream;
+};
+export const getOpenAICompletion = async (
+  token: string,
+  payload: OpenAIRequest
+) => {
+  const predeterminedResponse = "Now that you have Git on your system, you’ll want to do a few things to customize your Git environment. You should have to do these things only once on any given computer; they’ll stick around between upgrades. You can also change them at any time by running through the commands again. <option-1>";
+
+  let counter = 0;
+  const stream = new ReadableStream({
+    async start(controller) {
+      const responseChunks = predeterminedResponse.split(" ");
+
+      for (const chunk of responseChunks) {
+        if (counter < 2 && chunk.includes("\n")) {
+          continue;
+        }
+
+        const encoder = new TextEncoder();
+        const queue = encoder.encode(chunk+" ");
+        await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 150)));
+
+        controller.enqueue(queue);
+        counter++;
+      }
+
+      controller.close();
     },
   });
 
